@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: GPL-3.0-only
 //
 // Courtesy to https://wayland-book.com/surfaces/shared-memory.html
 

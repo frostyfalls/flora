@@ -1,10 +1,10 @@
-# SPDX-License-Identifier: MIT
+# SPDX-License-Identifier: GPL-3.0-only
 
 project(
   'waywallpaper',
   'c',
   version: '0.1.0',
-  license: 'MIT',
+  license: 'GPL-3.0-only',
   license_files: 'LICENSE',
   default_options: ['c_std=c99', 'warning_level=2'],
 )

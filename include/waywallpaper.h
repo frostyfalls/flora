@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: GPL-3.0-only
 
 #ifndef _WAYWALLPAPER_H
 #define _WAYWALLPAPER_H
