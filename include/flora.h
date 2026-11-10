@@ -1,7 +1,7 @@
 /* SPDX-License-Identifier: GPL-3.0-only */
 
-#ifndef WAYWALLPAPER_H_
-#define WAYWALLPAPER_H_
+#ifndef FLORA_H_
+#define FLORA_H_
 
 #include <pixman.h>
 #include <stdint.h>
@@ -30,4 +30,4 @@ char *xstrdup(const char *s);
 /* webp.c */
 pixman_image_t *read_webp(FILE *fp);
 
-#endif /* WAYWALLPAPER_H_ */
+#endif /* FLORA_H_ */
