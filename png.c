@@ -37,7 +37,8 @@ pixman_image_t *read_png(FILE *fp) {
 	png_set_sig_bytes(png_ptr, sizeof(*header));
 
 	png_read_info(png_ptr, info_ptr);
-	uint32_t width, height, color_type;
+	uint32_t width, height;
+	int32_t color_type;
 	png_get_IHDR(png_ptr, info_ptr, &width, &height, NULL, &color_type, NULL,
 			NULL, NULL);
 
