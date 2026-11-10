@@ -1,16 +1,10 @@
-// SPDX-License-Identifier: GPL-3.0-only
-//
-// Courtesy to https://wayland-book.com/surfaces/shared-memory.html
+/* SPDX-License-Identifier: GPL-3.0-only */
 
 #include <errno.h>
 #include <fcntl.h>
 #include <sys/mman.h>
 #include <time.h>
 #include <unistd.h>
-
-#include <pixman.h>
-
-#include "waywallpaper.h"
 
 static void randname(char *buf) {
 	struct timespec ts;
@@ -25,7 +19,7 @@ static void randname(char *buf) {
 static int create_shm_file(void) {
 	int retries = 100;
 	do {
-		char name[] = "/wl_shm-XXXXXX";
+		char name[] = "/waywallpaper-shm-XXXXXX";
 		randname(name + sizeof(name) - 7);
 		--retries;
 		int fd = shm_open(name, O_RDWR | O_CREAT | O_EXCL, 0600);
@@ -39,8 +33,9 @@ static int create_shm_file(void) {
 
 int allocate_shm_file(size_t size) {
 	int fd = create_shm_file();
-	if (fd < 0)
+	if (fd < 0) {
 		return -1;
+	}
 	int ret;
 	do {
 		ret = ftruncate(fd, size);
@@ -50,9 +45,4 @@ int allocate_shm_file(size_t size) {
 		return -1;
 	}
 	return fd;
-}
-
-void unmap_pixman_image(pixman_image_t *image, void *data) {
-	(void)data;
-	munmap(pixman_image_get_data(image), pixman_image_get_height(image) * pixman_image_get_stride(image));
 }

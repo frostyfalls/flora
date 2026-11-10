@@ -1,33 +1,33 @@
-// SPDX-License-Identifier: GPL-3.0-only
+/* SPDX-License-Identifier: GPL-3.0-only */
 
-#ifndef _WAYWALLPAPER_H
-#define _WAYWALLPAPER_H
+#ifndef WAYWALLPAPER_H_
+#define WAYWALLPAPER_H_
 
-#include <stdbool.h>
+#include <pixman.h>
 #include <stdint.h>
 #include <stdio.h>
 
-#include <pixman.h>
+/* display-mode.c */
+void display_mode_fill_fit(pixman_image_t *image, uint32_t width, uint32_t
+		height, bool fill);
+void display_mode_stretch(pixman_image_t *image, uint32_t width, uint32_t
+		height);
+void display_mode_center(pixman_image_t *image, uint32_t width, uint32_t
+		height);
 
-#define UNREACHABLE() abort()
+/* jpeg.c */
+pixman_image_t *read_jpeg(FILE *fp);
 
-extern bool have_png;
-extern bool have_jpeg;
-extern bool have_webp;
+/* png.c */
+pixman_image_t *read_png(FILE *fp);
 
+/* shm.c */
 int allocate_shm_file(size_t size);
-void unmap_pixman_image(pixman_image_t *image, void *data);
 
-#ifdef WW_HAVE_PNG
-pixman_image_t *load_png(FILE *file);
-#endif // WW_HAVE_PNG
+/* util.c */
+char *xstrdup(const char *s);
 
-#ifdef WW_HAVE_JPEG
-pixman_image_t *load_jpeg(FILE *file);
-#endif // WW_HAVE_JPEG
+/* webp.c */
+pixman_image_t *read_webp(FILE *fp);
 
-#ifdef WW_HAVE_WEBP
-pixman_image_t *load_webp(FILE *file);
-#endif // WW_HAVE_WEBP
-
-#endif // _WAYWALLPAPER_H
+#endif /* WAYWALLPAPER_H_ */

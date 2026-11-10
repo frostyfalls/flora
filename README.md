@@ -8,7 +8,9 @@
 * libjpeg-turbo (optional, for JPEG support)
 * libwebp (optional, for WEBP support)
 
-If no image formats are supported, only solid colors are available.
+If no image formats are supported, only solid colors are available. When using
+an image wallpaper, a solid color can still be set to fill the empty space in
+the case of fit and center display modes.
 
 ## Building
 
