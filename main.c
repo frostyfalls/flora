@@ -12,9 +12,9 @@
 #include <wayland-client.h>
 #include <wlr-layer-shell-unstable-v1.h>
 
-#include "waywallpaper.h"
+#include "flora.h"
 
-enum waywallpaper_display_mode {
+enum flora_display_mode {
 	MODE_INVALID = 0,
 	MODE_FILL,
 	MODE_FIT,
@@ -23,7 +23,7 @@ enum waywallpaper_display_mode {
 	MODE_TILE,
 };
 
-struct waywallpaper_state {
+struct flora_state {
 	struct wl_display *display;
 	struct wl_event_loop *event_loop;
 	struct wl_registry *registry;
@@ -31,16 +31,16 @@ struct waywallpaper_state {
 	struct wl_shm *shm;
 	struct zwlr_layer_shell_v1 *layer_shell;
 	bool quit;
-	struct wl_list outputs; /* struct waywallpaper_output::link */
+	struct wl_list outputs; /* struct flora_output::link */
 	uint32_t color;
 	const char *image_path;
 	FILE *image_file;
-	enum waywallpaper_display_mode display_mode;
+	enum flora_display_mode display_mode;
 	bool pixel_perfect;
 };
 
-struct waywallpaper_output {
-	struct waywallpaper_state *state;
+struct flora_output {
+	struct flora_state *state;
 	struct wl_output *wl_output;
 	uint32_t wl_name;
 	char *name, *description;
@@ -55,24 +55,24 @@ static void noop() {
 
 static pixman_image_t *read_image(FILE *fp) {
 	pixman_image_t *image;
-#ifdef WAYWALLPAPER_HAVE_PNG
+#ifdef FLORA_HAVE_PNG
 	image = read_png(fp);
 	if (image != NULL) {
 		return image;
 	}
-#endif /* WAYWALLPAPER_HAVE_PNG */
-#ifdef WAYWALLPAPER_HAVE_JPEG
+#endif /* FLORA_HAVE_PNG */
+#ifdef FLORA_HAVE_JPEG
 	image = read_jpeg(fp);
 	if (image != NULL) {
 		return image;
 	}
-#endif /* WAYWALLPAPER_HAVE_JPEG */
-#ifdef WAYWALLPAPER_HAVE_WEBP
+#endif /* FLORA_HAVE_JPEG */
+#ifdef FLORA_HAVE_WEBP
 	image = read_webp(fp);
 	if (image != NULL) {
 		return image;
 	}
-#endif /* WAYWALLPAPER_HAVE_WEBP */
+#endif /* FLORA_HAVE_WEBP */
 	return NULL;
 }
 
@@ -125,8 +125,8 @@ static pixman_image_t *create_surface_image(struct wl_shm *shm, struct
 	return image;
 }
 
-static void render_surface(struct waywallpaper_output *output) {
-	struct waywallpaper_state *state = output->state;
+static void render_surface(struct flora_output *output) {
+	struct flora_state *state = output->state;
 	uint16_t red = ((state->color >> 16) & 0xff) * 256u;
 	uint16_t green = ((state->color >> 8) & 0xff) * 256u;
 	uint16_t blue = (state->color & 0xff) * 256u;
@@ -166,7 +166,7 @@ static void render_surface(struct waywallpaper_output *output) {
 
 static void layer_surface_configure(void *data, struct zwlr_layer_surface_v1
 		*layer_surface, uint32_t serial, uint32_t width, uint32_t height) {
-	struct waywallpaper_output *output = data;
+	struct flora_output *output = data;
 	if (output->width == width && output->height == height) {
 		return;
 	}
@@ -182,8 +182,8 @@ static const struct zwlr_layer_surface_v1_listener layer_surface_listener = {
 };
 
 static void output_handle_done(void *data, struct wl_output *wl_output) {
-	struct waywallpaper_output *output = data;
-	struct waywallpaper_state *state = output->state;
+	struct flora_output *output = data;
+	struct flora_state *state = output->state;
 
 	if (output->surface == NULL) {
 		output->surface = wl_compositor_create_surface(state->compositor);
@@ -211,14 +211,14 @@ static void output_handle_done(void *data, struct wl_output *wl_output) {
 
 static void output_handle_name(void *data, struct wl_output *wl_output, const
 		char *name) {
-	struct waywallpaper_output *output = data;
+	struct flora_output *output = data;
 	free(output->name);
 	output->name = xstrdup(name);
 }
 
 static void output_handle_description(void *data, struct wl_output *wl_output,
 		const char *description) {
-	struct waywallpaper_output *output = data;
+	struct flora_output *output = data;
 	free(output->description);
 	output->name = xstrdup(description);
 }
@@ -234,7 +234,7 @@ static const struct wl_output_listener output_listener = {
 
 static void registry_handle_global(void *data, struct wl_registry *registry,
 		uint32_t name, const char *interface, uint32_t version) {
-	struct waywallpaper_state *state = data;
+	struct flora_state *state = data;
 
 	if (strcmp(interface, wl_compositor_interface.name) == 0) {
 		state->compositor = wl_registry_bind(registry, name,
@@ -244,7 +244,7 @@ static void registry_handle_global(void *data, struct wl_registry *registry,
 	} else if (strcmp(interface, zwlr_layer_shell_v1_interface.name) == 0) {
 		state->layer_shell = wl_registry_bind(registry, name, &zwlr_layer_shell_v1_interface, 2);
 	} else if (strcmp(interface, wl_output_interface.name) == 0) {
-		struct waywallpaper_output *output = calloc(1, sizeof(*output));
+		struct flora_output *output = calloc(1, sizeof(*output));
 		output->wl_output = wl_registry_bind(registry, name, &wl_output_interface, 4);
 		output->wl_name = name;
 		output->state = state;
@@ -255,8 +255,8 @@ static void registry_handle_global(void *data, struct wl_registry *registry,
 
 static void registry_handle_global_remove(void *data, struct wl_registry *registry,
 		uint32_t name) {
-	struct waywallpaper_state *state = data;
-	struct waywallpaper_output *output, *tmp;
+	struct flora_state *state = data;
+	struct flora_output *output, *tmp;
 	wl_list_for_each_safe(output, tmp, &state->outputs, link) {
 		if (output->wl_name == name) {
 			wl_list_remove(&output->link);
@@ -275,7 +275,7 @@ static const struct wl_registry_listener registry_listener = {
 };
 
 static int handle_signal(int sig, void *data) {
-	struct waywallpaper_state *state = data;
+	struct flora_state *state = data;
 	state->quit = true;
 	return 0;
 }
@@ -295,7 +295,7 @@ static bool parse_color(const char *color, uint32_t *result) {
 }
 
 int main(int argc, char **argv) {
-	struct waywallpaper_state state = {0};
+	struct flora_state state = {0};
 
 	int opt;
 	while ((opt = getopt(argc, argv, ":c:i:m:p")) != -1) {

@@ -1,4 +1,7 @@
-# waywallpaper
+# flora
+
+A small wallpaper for Wayland compositors supporting wlr-layer-shell. It
+supports solid colors in addition to PNG, JPEG, and WEBP images.
 
 ## Dependencies
 
@@ -24,4 +27,4 @@ ninja -C build
 
 ## License
 
-waywallpaper is licensed under the GPLv3. See COPYING for more information.
+flora is licensed under the GPLv3. See COPYING for more information.
